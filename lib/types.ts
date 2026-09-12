@@ -4,7 +4,7 @@ export type Translations = Partial<Record<Lang, Translation>>;
 
 export type Profile = {
   id: string;
-  organization_id: string | null;
+  organization_id?: string | null;
   slug: string;
   name: string;
   handle: string | null;
