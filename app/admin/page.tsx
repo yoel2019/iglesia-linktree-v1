@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Download } from 'lucide-react';
 import { supabaseBrowser } from '@/lib/supabase';
+import { t } from '@/lib/i18n';
+import { useLanguage } from '@/components/LanguageProvider';
 import type { Lang, Profile, LinkItem, Translations, Translation } from '@/lib/types';
 
 const langs: { id: Lang; label: string; name: string }[] = [
@@ -18,15 +20,12 @@ const ui: Record<UiKey, Record<Lang, string>> = {
 };
 function text(key: UiKey, lang: Lang) { return ui[key]?.[lang] || ui[key]?.en || ui[key]?.es || key; }
 function contentFallback<T extends keyof Translation>(base: string | null | undefined, translations: Translations | null | undefined, lang: Lang, key: T) {
-  const selected = translations?.[lang]?.[key];
-  if (selected) return selected;
-  const english = translations?.en?.[key];
-  if (english) return english;
-  return base || '';
+  return t(base, translations, lang, key);
 }
 
 export default function Admin() {
   const sb = supabaseBrowser();
+  const { lang, setLang } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [links, setLinks] = useState<LinkItem[]>([]);
@@ -36,7 +35,6 @@ export default function Admin() {
   const [msg, setMsg] = useState('');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [lang, setLang] = useState<Lang>('es');
 
   async function load(u: any) {
     setUser(u);
@@ -52,14 +50,10 @@ export default function Admin() {
   }
 
   useEffect(() => {
-    const saved = window.localStorage.getItem('admin-language') as Lang | null;
-    if (saved && ['es','en','pt'].includes(saved)) setLang(saved);
     sb.auth.getUser().then(({ data }) => load(data.user));
     const { data: { subscription } } = sb.auth.onAuthStateChange((_e, s) => load(s?.user));
     return () => subscription.unsubscribe();
   }, []);
-
-  function changeLang(value: Lang) { setLang(value); window.localStorage.setItem('admin-language', value); }
 
   if (loading) return <main className="login"><div className="login-card">{text('loading', lang)}</div></main>;
 
@@ -68,7 +62,7 @@ export default function Admin() {
     setMsg(r.error?.message || text('ready', lang));
   }
 
-  if (!user) return <main className="login"><div className="login-card"><h1>{text('admin', lang)}</h1><p className="muted">{text('adminDesc', lang)}</p><div className="field"><label>{text('email', lang)}</label><input value={email} onChange={e => setEmail(e.target.value)} type="email" /></div><div className="field"><label>{text('password', lang)}</label><input value={password} onChange={e => setPassword(e.target.value)} type="password" /></div><button className="btn btn-primary" style={{ width:'100%' }} onClick={auth}>{signup ? text('createAccount', lang) : text('login', lang)}</button><button className="btn btn-secondary" style={{ width:'100%', marginTop:9 }} onClick={() => setSignup(!signup)}>{signup ? text('alreadyHave', lang) : text('createAccount', lang)}</button>{msg && <p>{msg}</p>}<div className="language-tabs" style={{ marginTop:16, justifyContent:'center' }}>{langs.map(x => <button type="button" key={x.id} className={`language-circle ${lang===x.id?'active':''}`} title={x.name} aria-label={`${text('editLanguage',lang)} ${x.name}`} onClick={() => changeLang(x.id)}>{x.label}</button>)}</div></div></main>;
+  if (!user) return <main className="login"><div className="login-card"><h1>{text('admin', lang)}</h1><p className="muted">{text('adminDesc', lang)}</p><div className="field"><label>{text('email', lang)}</label><input value={email} onChange={e => setEmail(e.target.value)} type="email" /></div><div className="field"><label>{text('password', lang)}</label><input value={password} onChange={e => setPassword(e.target.value)} type="password" /></div><button className="btn btn-primary" style={{ width:'100%' }} onClick={auth}>{signup ? text('createAccount', lang) : text('login', lang)}</button><button className="btn btn-secondary" style={{ width:'100%', marginTop:9 }} onClick={() => setSignup(!signup)}>{signup ? text('alreadyHave', lang) : text('createAccount', lang)}</button>{msg && <p>{msg}</p>}<div className="language-tabs" style={{ marginTop:16, justifyContent:'center' }}>{langs.map(x => <button type="button" key={x.id} className={`language-circle ${lang===x.id?'active':''}`} title={x.name} aria-label={`${text('editLanguage',lang)} ${x.name}`} onClick={() => setLang(x.id)}>{x.label}</button>)}</div></div></main>;
 
   if (!profile) return <main className="login"><div className="login-card"><h1>{text('profileNotFound', lang)}</h1><p className="muted">{text('profileNotFoundDesc', lang)}</p></div></main>;
 
@@ -83,8 +77,8 @@ export default function Admin() {
   }
   function updateLinkTranslation(i: number, field: 'title'|'subtitle', value: string) {
     const l = links[i]; if (!l) return;
-    const t = l.translations || emptyT();
-    const next: Translations = { ...t, [lang]: { ...(t[lang] || {}), [field]: value } };
+    const trn = l.translations || emptyT();
+    const next: Translations = { ...trn, [lang]: { ...(trn[lang] || {}), [field]: value } };
     const n = [...links]; n[i] = { ...l, translations: next }; setLinks(n);
   }
   async function saveProfile() {
@@ -130,7 +124,7 @@ export default function Admin() {
   return <main className="admin-page"><div className="admin-wrap">
     <header className="admin-head"><div><span className="eyebrow">IGLESIA LINKTREE</span><h1>{text('admin',lang)}</h1></div><button className="btn btn-secondary" onClick={()=>sb.auth.signOut()}>{text('logout',lang)}</button></header>
     {msg&&<div className="success">{msg}</div>}
-    <section className="panel"><div className="section-title"><div><h2>{text('profile',lang)}</h2><p className="muted">{text('profileDesc',lang)}</p></div><div className="language-tabs" aria-label={text('editingLanguage',lang)}>{langs.map(x=><button type="button" key={x.id} className={`language-circle ${lang===x.id?'active':''}`} title={x.name} aria-label={`${text('editLanguage',lang)} ${x.name}`} onClick={()=>changeLang(x.id)}>{x.label}</button>)}</div></div>
+    <section className="panel"><div className="section-title"><div><h2>{text('profile',lang)}</h2><p className="muted">{text('profileDesc',lang)}</p></div><div className="language-tabs" aria-label={text('editingLanguage',lang)}>{langs.map(x=><button type="button" key={x.id} className={`language-circle ${lang===x.id?'active':''}`} title={x.name} aria-label={`${text('editLanguage',lang)} ${x.name}`} onClick={()=>setLang(x.id)}>{x.label}</button>)}</div></div>
       <div className="grid2"><div className="field"><label>{text('baseName',lang)}</label><input value={profile.name} onChange={e=>setProfile({...profile,name:e.target.value})}/></div><div className="field"><label>{text('slug',lang)}</label><input value={profile.slug} onChange={e=>setProfile({...profile,slug:e.target.value})}/></div><div className="field"><label>{text('nameIn',lang)} {currentLangName}</label><input value={tr.name||''} placeholder={contentFallback(profile.name,translations,'en','name')} onChange={e=>updateProfileTranslation('name',e.target.value)}/></div><div className="field"><label>{text('handleIn',lang)} {currentLangName}</label><input value={tr.handle||''} placeholder={contentFallback(profile.handle,translations,'en','handle')} onChange={e=>updateProfileTranslation('handle',e.target.value)}/></div></div>
       <div className="field"><label>{text('baseBio',lang)}</label><textarea value={profile.bio||''} onChange={e=>setProfile({...profile,bio:e.target.value})}/></div><div className="field"><label>{text('bioIn',lang)} {currentLangName}</label><textarea value={tr.bio||''} placeholder={contentFallback(profile.bio,translations,'en','bio')} onChange={e=>updateProfileTranslation('bio',e.target.value)}/></div>
       <div className="grid2"><div className="field"><label>{text('baseFooter',lang)}</label><input value={profile.footer_text||''} onChange={e=>setProfile({...profile,footer_text:e.target.value})}/></div><div className="field"><label>{text('footerIn',lang)} {currentLangName}</label><input value={tr.footer||''} placeholder={contentFallback(profile.footer_text,translations,'en','footer')} onChange={e=>updateProfileTranslation('footer',e.target.value)}/></div></div>
