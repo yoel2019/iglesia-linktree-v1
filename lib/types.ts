@@ -1,6 +1,7 @@
 export type Lang = 'es' | 'en' | 'pt';
 export type Translation = { name?: string; handle?: string; bio?: string; title?: string; subtitle?: string; footer?: string };
 export type Translations = Partial<Record<Lang, Translation>>;
+export type Palette = { accent: string; background: string; surface: string; text: string; muted: string; primary: string };
 
 export type Profile = {
   id: string;
@@ -12,6 +13,8 @@ export type Profile = {
   logo_url: string | null;
   accent_color: string;
   background_style: string;
+  template: string;
+  palette: Palette;
   featured_title: string | null;
   featured_url: string | null;
   featured_image_url: string | null;
