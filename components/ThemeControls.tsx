@@ -1,0 +1,22 @@
+'use client';
+import { useState } from 'react';
+import { Check, Palette as PaletteIcon, LayoutTemplate } from 'lucide-react';
+import type { AdminContext, Palette, Profile } from '@/lib/types';
+import { supabaseBrowser } from '@/lib/supabase';
+
+type Props={profile:Profile;setProfile:(p:Profile)=>void;context:AdminContext};
+const themes=[
+ {id:'elegant',name:'Elegante',desc:'Clásica y premium',palette:{accent:'#d8b36a',background:'#05080d',surface:'#111923',text:'#ffffff',muted:'#b8c1d0',primary:'#d8b36a'}},
+ {id:'minimal',name:'Minimalista',desc:'Clara y moderna',palette:{accent:'#111827',background:'#f5f7fa',surface:'#ffffff',text:'#111827',muted:'#667085',primary:'#111827'}},
+ {id:'soft',name:'Suave',desc:'Cálida y amigable',palette:{accent:'#b56b45',background:'#fff8f2',surface:'#ffffff',text:'#3b2922',muted:'#7d6b64',primary:'#c9825b'}},
+ {id:'bold',name:'Impacto',desc:'Fuerte y llamativa',palette:{accent:'#5b7cff',background:'#070b1a',surface:'#121a31',text:'#ffffff',muted:'#b9c3df',primary:'#5b7cff'}},
+ {id:'forest',name:'Verde',desc:'Natural y serena',palette:{accent:'#6fa47b',background:'#07120d',surface:'#102019',text:'#f5fff7',muted:'#b9cbbd',primary:'#4f8b60'}},
+ {id:'burgundy',name:'Borgoña',desc:'Solemne y elegante',palette:{accent:'#d49a73',background:'#160b0d',surface:'#261417',text:'#fff8f5',muted:'#d6bfc0',primary:'#8f3f4d'}},
+];
+export default function ThemeControls({profile,setProfile,context}:Props){
+ const sb=supabaseBrowser(); const [saving,setSaving]=useState(false); const [saved,setSaved]=useState(false);
+ if(!context.permissions.manage_profile)return null;
+ async function applyTheme(theme:typeof themes[number]){setSaving(true);setSaved(false);const palette=theme.palette as Palette;setProfile({...profile,template:theme.id,palette,accent_color:palette.accent,background_style:theme.id});const {error}=await sb.from('profiles').update({template:theme.id,palette,accent_color:palette.accent,background_style:theme.id}).eq('id',profile.id);if(!error){setSaved(true);window.setTimeout(()=>setSaved(false),1800)}setSaving(false)}
+ async function updateAccent(value:string){const palette={...(profile.palette||themes[0].palette),accent:value,primary:value} as Palette;setProfile({...profile,palette,accent_color:value});const {error}=await sb.from('profiles').update({palette,accent_color:value}).eq('id',profile.id);if(!error){setSaved(true);window.setTimeout(()=>setSaved(false),1800)}}
+ return <section className="panel theme-editor"><div className="section-title"><div><h2><PaletteIcon size={18}/> Personalización</h2><p className="muted">Elige una plantilla y una paleta sin tocar código. Los cambios se aplican automáticamente a la página pública.</p></div>{saved&&<span className="theme-saved"><Check size={15}/> Guardado</span>}</div><div className="theme-subtitle"><LayoutTemplate size={16}/> Plantilla</div><div className="theme-grid">{themes.map(theme=><button type="button" key={theme.id} disabled={saving} className={`theme-card ${current===theme.id?'selected':''}`} onClick={()=>applyTheme(theme)}><span className="theme-preview" style={{background:theme.palette.background}}><span style={{background:theme.palette.primary}}/><i style={{background:theme.palette.surface}}/><b style={{background:theme.palette.accent}}/></span><strong>{theme.name}</strong><small>{theme.desc}</small>{current===theme.id&&<em><Check size={14}/></em>}</button>)}</div><div className="theme-subtitle"><PaletteIcon size={16}/> Color principal</div><div className="color-presets">{themes.map(theme=><button type="button" key={theme.id+'-color'} className="swatch" title={theme.name} aria-label={`Usar color ${theme.name}`} style={{background:theme.palette.accent}} onClick={()=>updateAccent(theme.palette.accent)}><span>{profile.palette?.accent===theme.palette.accent&&<Check size={15}/>}</span></button>)}<label className="custom-color"><input type="color" value={profile.palette?.accent||profile.accent_color||'#d8b36a'} onChange={e=>updateAccent(e.target.value)}/><span>Personalizado</span></label></div></section>;
+}
