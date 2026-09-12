@@ -110,7 +110,7 @@ export default function Admin() {
     const svg = document.querySelector('#admin-qr svg') as SVGSVGElement | null;
     if (!svg) return;
     const blob = new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `qr-${profile.slug}.svg`; a.click(); URL.revokeObjectURL(a.href);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `qr-${profile?.slug || 'iglesia'}.svg`; a.click(); URL.revokeObjectURL(a.href);
   }
 
   function downloadPng() {
@@ -118,7 +118,7 @@ export default function Admin() {
     if (!svg) return;
     const xml = new XMLSerializer().serializeToString(svg);
     const img = new Image();
-    img.onload = () => { const c = document.createElement('canvas'); c.width = 1024; c.height = 1024; const ctx = c.getContext('2d'); if (!ctx) return; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 1024, 1024); ctx.drawImage(img, 0, 0, 1024, 1024); c.toBlob(b => { if (!b) return; const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `qr-${profile.slug}.png`; a.click(); }, 'image/png');
+    img.onload = () => { const c = document.createElement('canvas'); c.width = 1024; c.height = 1024; const ctx = c.getContext('2d'); if (!ctx) return; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 1024, 1024); ctx.drawImage(img, 0, 0, 1024, 1024); c.toBlob(b => { if (!b) return; const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `qr-${profile?.slug || 'iglesia'}.png`; a.click(); }, 'image/png');
     };
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
   }
