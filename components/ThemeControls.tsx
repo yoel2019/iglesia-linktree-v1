@@ -14,7 +14,7 @@ const themes=[
  {id:'burgundy',name:'Borgoña',desc:'Solemne y elegante',palette:{accent:'#d49a73',background:'#160b0d',surface:'#261417',text:'#fff8f5',muted:'#d6bfc0',primary:'#8f3f4d'}},
 ];
 export default function ThemeControls({profile,setProfile,context}:Props){
- const sb=supabaseBrowser(); const [saving,setSaving]=useState(false); const [saved,setSaved]=useState(false);
+ const sb=supabaseBrowser(); const [saving,setSaving]=useState(false); const [saved,setSaved]=useState(false); const current=profile.template||'elegant';
  if(!context.permissions.manage_profile)return null;
  async function applyTheme(theme:typeof themes[number]){setSaving(true);setSaved(false);const palette=theme.palette as Palette;setProfile({...profile,template:theme.id,palette,accent_color:palette.accent,background_style:theme.id});const {error}=await sb.from('profiles').update({template:theme.id,palette,accent_color:palette.accent,background_style:theme.id}).eq('id',profile.id);if(!error){setSaved(true);window.setTimeout(()=>setSaved(false),1800)}setSaving(false)}
  async function updateAccent(value:string){const palette={...(profile.palette||themes[0].palette),accent:value,primary:value} as Palette;setProfile({...profile,palette,accent_color:value});const {error}=await sb.from('profiles').update({palette,accent_color:value}).eq('id',profile.id);if(!error){setSaved(true);window.setTimeout(()=>setSaved(false),1800)}}
