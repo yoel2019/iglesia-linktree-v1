@@ -1,0 +1,15 @@
+'use client';
+import { useEffect, useState } from 'react';
+import { Shield, Crown, UserCog, Pencil, Save } from 'lucide-react';
+import { supabaseBrowser } from '@/lib/supabase';
+import type { AdminContext } from '@/lib/types';
+
+type Member={id:string;user_id:string;email:string|null;display_name:string|null;role:'superadmin'|'admin'|'editor';is_primary:boolean};
+export default function TeamAdmin({context}:{context:AdminContext}){
+ const sb=supabaseBrowser(); const [members,setMembers]=useState<Member[]>([]); const [loading,setLoading]=useState(true); const [saving,setSaving]=useState<string|null>(null); const [msg,setMsg]=useState('');
+ const canManage=!!context.permissions.manage_members;
+ useEffect(()=>{if(!canManage){setLoading(false);return}(async()=>{const {data,error}=await sb.rpc('get_org_members_admin',{p_organization_id:context.organization_id});if(error)setMsg(`Error: ${error.message}`);else setMembers((data||[]) as Member[]);setLoading(false)})()},[context.organization_id,canManage]);
+ async function changeRole(userId:string,role:Member['role']){setSaving(userId);setMsg('');const {error}=await sb.rpc('update_org_member_role',{p_organization_id:context.organization_id,p_user_id:userId,p_role:role});if(error)setMsg(`Error: ${error.message}`);else{setMembers(ms=>ms.map(m=>m.user_id===userId?{...m,role}:m));setMsg('✓ Rol actualizado')}setSaving(null)}
+ if(!canManage)return <section className="panel"><h2>Equipo</h2><p className="muted">No tienes permiso para administrar miembros.</p></section>;
+ return <section className="panel team-panel"><div className="section-title"><div><h2><Shield size={19}/> Equipo y permisos</h2><p className="muted">Administra quién puede entrar al panel y qué nivel de acceso tiene.</p></div></div>{loading?<p className="muted">Cargando miembros…</p>:<div className="member-list">{members.map(m=><div className="member-row" key={m.id}><div className="member-avatar">{m.is_primary?<Crown size={17}/>:m.role==='admin'?<UserCog size={17}/>:<Pencil size={17}/>}</div><div className="member-info"><strong>{m.display_name||'Miembro'}</strong><span>{m.email||'Cuenta autenticada'}</span></div><div className="member-role">{m.is_primary?<span className="primary-badge">Superadmin principal</span>:<select value={m.role} disabled={saving===m.user_id||(!context.permissions.manage_superadmins&&m.role==='superadmin')} onChange={e=>changeRole(m.user_id,e.target.value as Member['role'])}><option value="editor">Editor</option><option value="admin">Administrador</option>{context.permissions.manage_superadmins&&<option value="superadmin">Superadmin</option>}</select>}</div>{!m.is_primary&&saving===m.user_id&&<span className="saving-mini"><Save size={14}/> Guardando</span>}</div>)}</div>}{msg&&<p className={msg.startsWith('Error')?'error':'success'}>{msg}</p>}<div className="role-help"><div><b>Superadmin</b><span>Acceso administrativo amplio y gestión de superadmins.</span></div><div><b>Administrador</b><span>Gestiona contenido, enlaces y configuración permitida.</span></div><div><b>Editor</b><span>Acceso limitado a las tareas asignadas.</span></div></div></section>;
+}
