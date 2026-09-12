@@ -1,0 +1,97 @@
+name: Fix admin context loading
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch admin context loading
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('app/admin/page.tsx')
+          s = p.read_text()
+          marker = "  useEffect(() => {\n    if (!user || !context) return;"
+          end = s.index(marker)
+          start = s.index("  useEffect(() => {", s.index("export default function Admin()"))
+          replacement = '''  useEffect(() => {
+    let mounted = true;
+    sb.auth.getUser().then(({ data }) => {
+      if (mounted) setUser(data.user);
+    });
+    const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
+      if (mounted) setUser(session?.user ?? null);
+    });
+    return () => { mounted = false; subscription.unsubscribe(); };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadAdminData() {
+      setLoading(true);
+      setContext(null);
+      setProfile(null);
+      setLinks([]);
+      setMsg('');
+      if (!user) { setLoading(false); return; }
+
+      const { data: c, error: ce } = await sb.rpc('get_my_admin_context');
+      if (cancelled) return;
+      if (ce) {
+        setMsg(`Error de acceso: ${ce.message}`);
+        setLoading(false);
+        return;
+      }
+      const nextContext = c?.[0] ? c[0] as AdminContext : null;
+      setContext(nextContext);
+      if (!nextContext?.profile_id) {
+        setMsg('La cuenta está autenticada, pero no tiene un perfil administrativo asociado.');
+        setLoading(false);
+        return;
+      }
+
+      const { data: p, error: pe } = await sb.from('profiles').select('*').eq('id', nextContext.profile_id).maybeSingle();
+      if (cancelled) return;
+      if (pe) {
+        setMsg(`Error al cargar el perfil: ${pe.message}`);
+        setLoading(false);
+        return;
+      }
+      setProfile(p);
+      if (p) {
+        const { data: l, error: le } = await sb.from('links').select('*').eq('profile_id', p.id).order('sort_order');
+        if (cancelled) return;
+        if (le) {
+          setMsg(`Error al cargar los enlaces: ${le.message}`);
+        } else {
+          setLinks(l || []);
+        }
+      }
+      setLoading(false);
+    }
+    loadAdminData();
+    return () => { cancelled = true; };
+  }, [user]);
+
+'''
+          p.write_text(s[:start] + replacement + s[end:])
+          PY
+      - name: Commit fix
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/admin/page.tsx
+          git commit -m "Fix admin context loading"
+          git push
