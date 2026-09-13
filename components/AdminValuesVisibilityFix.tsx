@@ -4,27 +4,28 @@ import { useEffect } from 'react';
 
 export default function AdminValuesVisibilityFix(){
   useEffect(()=>{
+    let frame=0;
     const apply=()=>{
-      const lang=(typeof window!=='undefined'?localStorage.getItem('site-language-admin'):'es')||'es';
-      document.querySelectorAll<HTMLElement>('.admin-main .collapsible.is-open .collapsible-body > .field').forEach(field=>{
-        field.style.setProperty('display','grid','important');
-        field.style.setProperty('visibility','visible','important');
-        field.style.setProperty('opacity','1','important');
-        field.style.setProperty('height','auto','important');
-        field.style.setProperty('max-height','none','important');
-        field.style.setProperty('overflow','visible','important');
-        const label=field.querySelector('label')?.textContent?.trim();
-        if(label==='Valores'||label==='Values'){
-          const textarea=field.querySelector<HTMLTextAreaElement>('textarea');
-          if(textarea) textarea.placeholder=lang==='pt'?'Amar\nServir\nTransformar':lang==='en'?'Love\nServe\nTransform':'Amar\nServir\nTransformar';
-        }
+      cancelAnimationFrame(frame);
+      frame=requestAnimationFrame(()=>{
+        const lang=(typeof window!=='undefined'?localStorage.getItem('site-language-admin'):'es')||'es';
+        document.querySelectorAll<HTMLElement>('.admin-main .collapsible.is-open .collapsible-body > .field').forEach(field=>{
+          const label=field.querySelector('label')?.textContent?.trim();
+          if(label==='Valores'||label==='Values'){
+            const textarea=field.querySelector<HTMLTextAreaElement>('textarea');
+            if(textarea){
+              const placeholder=lang==='pt'?'Amar\nServir\nTransformar':lang==='en'?'Love\nServe\nTransform':'Amar\nServir\nTransformar';
+              if(textarea.placeholder!==placeholder) textarea.placeholder=placeholder;
+            }
+          }
+        });
       });
     };
     apply();
     const observer=new MutationObserver(apply);
-    observer.observe(document.body,{subtree:true,childList:true,attributes:true});
+    observer.observe(document.body,{subtree:true,childList:true});
     window.addEventListener('storage',apply);
-    return()=>{observer.disconnect();window.removeEventListener('storage',apply)};
+    return()=>{cancelAnimationFrame(frame);observer.disconnect();window.removeEventListener('storage',apply)};
   },[]);
 
   return <style jsx global>{`
