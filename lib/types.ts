@@ -1,5 +1,5 @@
 export type Lang = 'es' | 'en' | 'pt';
-export type Translation = { name?: string; handle?: string; bio?: string; footer?: string; kicker?: string; values?: string; quote?: string; verse?: string; title?: string; subtitle?: string };
+export type Translation = { bio?: string; footer?: string; kicker?: string; values?: string; quote?: string; verse?: string; title?: string; subtitle?: string };
 export type Translations = Partial<Record<Lang, Translation>>;
 export type Palette = { accent: string; background: string; surface: string; text: string; muted: string; primary: string };
 export type Profile = { id:string; organization_id?:string|null; slug:string; name:string; handle:string|null; bio:string|null; logo_url:string|null; accent_color:string; background_style:string; template:string; palette:Palette; kicker:string; values_text:string; quote_text:string; quote_verse:string; contact_email:string|null; contact_phone:string|null; contact_address:string|null; show_contact_email:boolean; show_contact_phone:boolean; show_contact_address:boolean; featured_title:string|null; featured_url:string|null; featured_image_url:string|null; footer_text:string|null; published:boolean; translations?:Translations|null };
