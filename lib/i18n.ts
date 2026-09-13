@@ -10,9 +10,8 @@ export function resolveLang(value: unknown, fallback: Lang = DEFAULT_LANG): Lang
 export function t<T extends keyof Translation>(base: string | null | undefined, translations: Translations | null | undefined, lang: Lang, key: T): string {
   const selected = translations?.[lang]?.[key];
   if (selected?.trim()) return selected;
-  const english = translations?.en?.[key];
-  if (english?.trim()) return english;
-  return base || '';
+  const fallback = base || translations?.es?.[key] || translations?.en?.[key] || translations?.pt?.[key];
+  return fallback?.trim() ? fallback : '';
 }
 
 export function uiText<T extends Record<Lang, string>>(dictionary: T, lang: Lang): string {
