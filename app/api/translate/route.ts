@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 const LANGS = new Set(['es', 'en', 'pt']);
+const TRANSLATABLE_KEYS = new Set(['bio', 'kicker', 'values', 'quote', 'verse', 'footer', 'title', 'subtitle']);
 const MAX_TEXTS = 30;
 const MAX_CHARS = 3000;
 type Lang = 'es' | 'en' | 'pt';
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
     const targets: Lang[] = Array.isArray(body?.targets) ? [...new Set(body.targets.map(String).filter((x: string): x is Lang => LANGS.has(x)))] : [];
     const texts = body?.texts;
     if (!targets.length || !texts || typeof texts !== 'object' || Array.isArray(texts)) return NextResponse.json({ error: 'Solicitud de traducción no válida.' }, { status: 400 });
-    const entries = Object.entries(texts).slice(0, MAX_TEXTS);
+    const entries = Object.entries(texts).filter(([key]) => TRANSLATABLE_KEYS.has(key)).slice(0, MAX_TEXTS);
     const translations: Record<Lang, Record<string, string>> = { es: {}, en: {}, pt: {} };
     const detected: Record<string, Lang> = {};
     await Promise.all(targets.flatMap((target: Lang) => entries.map(async ([key, value]) => {
