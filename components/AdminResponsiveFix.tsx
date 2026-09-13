@@ -10,7 +10,7 @@ export default function AdminResponsiveFix(){
     .admin-main .collapsible-copy strong,.admin-main .collapsible-copy small{max-width:100%;overflow-wrap:anywhere}
     .admin-main .collapsible-body{overflow:visible}
 
-    /* At tablet widths the desktop two-column shell is removed entirely. */
+    /* Tablet/phone layout: the content must never inherit the desktop sidebar grid. */
     @media(max-width:1100px){
       .admin-page{width:100%!important;max-width:100%!important;padding:16px 18px 104px!important;overflow-x:hidden!important}
       .admin-wrap{width:100%!important;max-width:100%!important;display:block!important;margin:0!important}
@@ -37,6 +37,7 @@ export default function AdminResponsiveFix(){
 
     @media(max-width:640px){
       .admin-page{padding:10px 10px 94px!important}
+      .admin-wrap{display:block!important}
       .admin-head{display:block!important;padding:2px 2px 14px!important}
       .admin-head h1{font-size:25px!important}
       .admin-head-actions{width:100%!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin-top:12px!important}
