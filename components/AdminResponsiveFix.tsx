@@ -53,13 +53,17 @@ export default function AdminResponsiveFix(){
       .admin-main .collapsible-badge{display:none!important}
       .admin-main .contact-field-top{align-items:flex-start!important;gap:10px!important}
       .admin-main .switch-field{width:auto!important;justify-content:flex-end!important}
-      /* Save is an action button, not a full-width field. */
-      .admin-main .form-savebar{justify-content:flex-start!important;align-items:center!important}
-      .admin-main .form-savebar .btn{display:inline-flex!important;width:auto!important;min-width:0!important;max-width:max-content!important;height:42px!important;min-height:42px!important;padding:0 18px!important;border-radius:10px!important}
+
+      /* Language selector: three compact, true circular controls. */
+      .admin-main .language-tabs{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;width:auto!important}
+      .admin-main .language-tabs .language-circle{flex:0 0 42px!important;width:42px!important;height:42px!important;min-width:42px!important;max-width:42px!important;min-height:42px!important;max-height:42px!important;padding:0!important;margin:0!important;aspect-ratio:1 / 1!important;border-radius:50%!important;display:grid!important;place-items:center!important}
+
+      /* Save is an action button, never a full-width white/boxed bar. */
+      .admin-main .form-savebar{display:flex!important;justify-content:flex-start!important;align-items:center!important;width:100%!important;margin-top:14px!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;min-height:0!important}
+      .admin-main .form-savebar .btn{display:inline-flex!important;flex:0 0 auto!important;width:auto!important;min-width:0!important;max-width:max-content!important;height:42px!important;min-height:42px!important;padding:0 18px!important;border-radius:10px!important}
+
       .admin-main .link-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
       .admin-main .link-actions .btn{width:100%!important}
-      .admin-main .language-tabs{width:100%!important}
-      .admin-main .language-tabs .language-circle{flex:0 0 42px!important}
       .admin-main textarea{min-height:112px!important}
       .admin-nav{width:calc(100% - 16px)!important;height:68px!important;bottom:8px!important;border-radius:18px!important}
       .admin-nav .nav-group button{height:56px!important;min-height:56px!important;font-size:8.5px!important;padding:4px 1px!important}
