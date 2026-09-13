@@ -17,7 +17,7 @@ export default function PublicPage({profile,links,origin:_origin}:{profile:Profi
  const activeLinks=links.filter(x=>x.active).sort((a,b)=>a.sort_order-b.sort_order);
  const socials=activeLinks.filter(x=>['instagram','facebook','youtube','whatsapp'].includes(x.icon?.toLowerCase())).slice(0,5);
  const localizedName=profile.name||'';
- const values=t(profile.values_text,profile.translations,lang,'values').split('|').map(v=>v.trim()).filter(Boolean);
+ const values=t(profile.values_text,profile.translations,lang,'values').split(/[|\n]/).map(v=>v.trim()).filter(Boolean);
  const bio=t(profile.bio,profile.translations,lang,'bio');
  const ui=useMemo(()=>({
    kicker:t(profile.kicker,profile.translations,lang,'kicker'), values,
