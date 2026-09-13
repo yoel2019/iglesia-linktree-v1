@@ -10,7 +10,6 @@ export default function AdminResponsiveFix(){
     .admin-main .collapsible-copy strong,.admin-main .collapsible-copy small{max-width:100%;overflow-wrap:anywhere}
     .admin-main .collapsible-body{overflow:visible}
 
-    /* Tablet/phone layout: the content must never inherit the desktop sidebar grid. */
     @media(max-width:1100px){
       .admin-page{width:100%!important;max-width:100%!important;padding:16px 18px 104px!important;overflow-x:hidden!important}
       .admin-wrap{width:100%!important;max-width:100%!important;display:block!important;margin:0!important}
@@ -31,8 +30,8 @@ export default function AdminResponsiveFix(){
       .admin-head-actions{flex:0 0 auto!important}
       .admin-main .panel{padding:22px!important}
       .admin-main .grid2{grid-template-columns:1fr 1fr!important;gap:14px!important}
-      .admin-main .form-savebar{justify-content:flex-end!important}
-      .admin-main .form-savebar .btn{width:auto!important;min-width:170px!important;border-radius:10px!important}
+      .admin-main .form-savebar{display:flex!important;justify-content:flex-end!important;align-items:center!important;width:100%!important;margin-top:14px!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+      .admin-main .form-savebar .btn{display:inline-flex!important;flex:0 0 auto!important;width:auto!important;min-width:170px!important;height:42px!important;padding:0 18px!important;border-radius:10px!important}
     }
 
     @media(max-width:640px){
@@ -54,11 +53,11 @@ export default function AdminResponsiveFix(){
       .admin-main .contact-field-top{align-items:flex-start!important;gap:10px!important}
       .admin-main .switch-field{width:auto!important;justify-content:flex-end!important}
 
-      /* Language selector: three compact, true circular controls. */
-      .admin-main .language-tabs{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;width:auto!important}
+      /* Admin language selector: compact circular controls, independent from public language styling. */
+      .admin-main .language-tabs{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;width:max-content!important;max-width:100%!important}
       .admin-main .language-tabs .language-circle{flex:0 0 42px!important;width:42px!important;height:42px!important;min-width:42px!important;max-width:42px!important;min-height:42px!important;max-height:42px!important;padding:0!important;margin:0!important;aspect-ratio:1 / 1!important;border-radius:50%!important;display:grid!important;place-items:center!important}
 
-      /* Save is an action button, never a full-width white/boxed bar. */
+      /* Admin profile save: no enclosing bar, no full-width button. */
       .admin-main .form-savebar{display:flex!important;justify-content:flex-start!important;align-items:center!important;width:100%!important;margin-top:14px!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;min-height:0!important}
       .admin-main .form-savebar .btn{display:inline-flex!important;flex:0 0 auto!important;width:auto!important;min-width:0!important;max-width:max-content!important;height:42px!important;min-height:42px!important;padding:0 18px!important;border-radius:10px!important}
 
